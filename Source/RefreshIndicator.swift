@@ -12,14 +12,14 @@ import QuartzCore
 
 private let RefreshAnimationKey = "spinkit-anim";
 
-@objc public class RefreshIndicator: UIView {
-    public var color: UIColor {
+@objc open class RefreshIndicator: UIView {
+    open var color: UIColor {
         willSet {
             layer.sublayers?.forEach{ $0.backgroundColor = newValue.cgColor }
         }
     }
-    public var hideWhenStopped: Bool
-    private var stopped: Bool
+    open var hideWhenStopped: Bool
+    fileprivate var stopped: Bool
     
     public init(color: UIColor) {
         self.hideWhenStopped = true
@@ -71,7 +71,7 @@ private let RefreshAnimationKey = "spinkit-anim";
         }
     }
     
-    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+    open override func sizeThatFits(_ size: CGSize) -> CGSize {
         return CGSize(width: 30, height: 30)
     }
     

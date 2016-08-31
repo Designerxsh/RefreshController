@@ -19,7 +19,7 @@ public protocol RefreshViewProtocol: class {
     func pullToUpdate(_ controller: PullToRefreshController, didSetEnable enable: Bool)
 }
 
-public class RefreshView: UIView {
+open class RefreshView: UIView {
     var state: RefreshState? {
         willSet {
             if newValue == .stop {
@@ -39,7 +39,7 @@ public class RefreshView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override func layoutSubviews() {
+    open override func layoutSubviews() {
         super.layoutSubviews()
         let boundsCenter = CGPoint(x: bounds.midX, y: bounds.midY)
         indicator.center = boundsCenter

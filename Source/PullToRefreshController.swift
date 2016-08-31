@@ -19,23 +19,23 @@ public enum RefreshDirection {
 
 public typealias RefreshHandler = () -> ()
 
-public class PullToRefreshController: NSObject {
+open class PullToRefreshController: NSObject {
     
-    public weak var scrollView: UIScrollView? {
+    open weak var scrollView: UIScrollView? {
         didSet {
             removeScrollObser(oldValue)
             addScrollObser(scrollView)
         }
     }
-    private(set) var direction: RefreshDirection
-    private var triggerTime: TimeInterval = 0
-    private var originContentInset: CGFloat
-    private var refresView: UIView!
-    public var triggerHandler: RefreshHandler?
-    public var minRefrehDuration: TimeInterval = 60
+    fileprivate(set) var direction: RefreshDirection
+    fileprivate var triggerTime: TimeInterval = 0
+    fileprivate var originContentInset: CGFloat
+    fileprivate var refresView: UIView!
+    open var triggerHandler: RefreshHandler?
+    open var minRefrehDuration: TimeInterval = 60
     
     // which work for RefreshDirection isLoadMore
-    public var autoLoadMore: Bool {
+    open var autoLoadMore: Bool {
         willSet {
             if autoLoadMore != newValue {
                 scrollView?.contentInset = initialContentInset
@@ -50,9 +50,9 @@ public class PullToRefreshController: NSObject {
      *  Set to true, which means customView is below scrollview content,
      *  Otherise `customView` below `scrollView?.contentInset.bottom`.
      */
-    public var showRefreshControllerAboveContent = false
+    open var showRefreshControllerAboveContent = false
     
-    private var enable: Bool {
+    fileprivate var enable: Bool {
         willSet {
             if enable != newValue {
                 if !newValue && self.state != .stop {
@@ -67,7 +67,7 @@ public class PullToRefreshController: NSObject {
             }
         }
     }
-    private(set) var state: RefreshState {
+    fileprivate(set) var state: RefreshState {
         willSet(newValue) {
             if let refresView = refresView as? RefreshViewProtocol, state != newValue {
                 refresView.pullToUpdate(self, didChangeState: newValue)
@@ -91,7 +91,7 @@ public class PullToRefreshController: NSObject {
         self.init(scrollView: scrollView, direction: .top)
     }
     
-    private func addScrollObser(_ scrollView: UIScrollView?) {
+    fileprivate func addScrollObser(_ scrollView: UIScrollView?) {
         scrollView?.addObserver(self, forKeyPath: "contentOffset", options: .new, context: nil)
         if direction.isLoadMore {
             scrollView?.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
@@ -101,7 +101,7 @@ public class PullToRefreshController: NSObject {
         }
     }
 
-    private func removeScrollObser(_ scrollView: UIScrollView?) {
+    fileprivate func removeScrollObser(_ scrollView: UIScrollView?) {
         scrollView?.removeObserver(self, forKeyPath: "contentOffset")
         if direction.isLoadMore {
             scrollView?.removeObserver(self, forKeyPath: "contentSize")
@@ -112,7 +112,7 @@ public class PullToRefreshController: NSObject {
     
     /// MAKR: Public method
     
-    public func triggerRefresh(_ animated: Bool) {
+    open func triggerRefresh(_ animated: Bool) {
         if !enable || state == .loading {
             return
         }
@@ -135,7 +135,7 @@ public class PullToRefreshController: NSObject {
         }
     }
     
-    public func stopToRefresh(_ animated: Bool, completion: RefreshHandler? = nil) {
+    open func stopToRefresh(_ animated: Bool, completion: RefreshHandler? = nil) {
         if !enable || state == .stop {
             return
         }
@@ -160,7 +160,7 @@ public class PullToRefreshController: NSObject {
         })
     }
     
-    public func setCustomView<T: RefreshViewProtocol>(_ customView: T) where T: UIView {
+    open func setCustomView<T: RefreshViewProtocol>(_ customView: T) where T: UIView {
         if refresView.superview != nil {
             refresView.removeFromSuperview()
         }
@@ -171,7 +171,7 @@ public class PullToRefreshController: NSObject {
     
     /// MARK: Private Method
     
-    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         guard let keyPath = keyPath else {
             return
@@ -191,7 +191,7 @@ public class PullToRefreshController: NSObject {
         }
     }
     
-    private func checkOffsets(_ change: [NSKeyValueChangeKey: AnyObject]?) {
+    fileprivate func checkOffsets(_ change: [NSKeyValueChangeKey: AnyObject]?) {
         if !enable {
             return
         }
@@ -273,7 +273,7 @@ public class PullToRefreshController: NSObject {
         }
     }
     
-    private func layoutRefreshView() {
+    fileprivate func layoutRefreshView() {
         refresView.isHidden = !enable
         if state != .stop || !enable {
             return
@@ -304,7 +304,7 @@ public class PullToRefreshController: NSObject {
         refresView.frame = frame
     }
     
-    private var initialContentInset: UIEdgeInsets {
+    fileprivate var initialContentInset: UIEdgeInsets {
         guard var contentInset = scrollView?.contentInset else { return UIEdgeInsets.zero }
         if enable && autoLoadMore {
             if direction == .bottom {
@@ -322,7 +322,7 @@ public class PullToRefreshController: NSObject {
         return contentInset
     }
     
-    private var adjustedContentInset: UIEdgeInsets {
+    fileprivate var adjustedContentInset: UIEdgeInsets {
         guard var contentInset = scrollView?.contentInset else { return UIEdgeInsets.zero }
         let refresingOffset = visibleDistance
         let mutil: CGFloat = state == .stop ? -1 : 1
@@ -357,7 +357,7 @@ public class PullToRefreshController: NSObject {
         }
     }
     
-    private var visibleDistance: CGFloat {
+    fileprivate var visibleDistance: CGFloat {
         switch direction {
         case .top, .bottom:
             return refresView.frame.height
@@ -366,7 +366,7 @@ public class PullToRefreshController: NSObject {
         }
     }
     
-    private var defalutRefreshView: RefreshView {
+    fileprivate var defalutRefreshView: RefreshView {
         let bounds = self.scrollView!.bounds 
         let size = direction.refreshViewSize(bounds)
         let view = RefreshView(frame: CGRect(x: 0, y: 0, width: size.width, height: size.height))
