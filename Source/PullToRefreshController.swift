@@ -172,15 +172,14 @@ open class PullToRefreshController: NSObject {
     /// MARK: Private Method
     
     open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-        guard let keyPath = keyPath else {
-            return
+        guard let path = keyPath else {
+            return super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
-        if keyPath == "contentOffset" {
+        if path == "contentOffset" {
             checkOffsets(change as [NSKeyValueChangeKey : AnyObject]?)
-        } else if keyPath == "contentSize" {
+        } else if path == "contentSize" {
             layoutRefreshView()
-        } else if keyPath == "contentInset" && !direction.isLoadMore {
+        } else if path == "contentInset" && !direction.isLoadMore {
             if let changeValue = change?[NSKeyValueChangeKey.newKey] as? NSValue {
                 let insets = changeValue.uiEdgeInsetsValue
                 if originContentInset != insets.top {
