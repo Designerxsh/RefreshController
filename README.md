@@ -6,6 +6,7 @@ A simple refresh and load more Refresh controller by swift
   which translate by JYRefreshController.
   - fix bugs when tableview heiht height then contentsize and trigger both refresh and loadmore bug.
   - set UIScrollView as option to break retain circle.
+  - Support Swift3
 
   support carthage
   ```
