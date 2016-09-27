@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "RefreshController"
-  s.version      = "0.1.0"
+  s.version      = "0.2.0"
   s.summary      = "A simple refresh and load more Refresh controller by swift"
   s.description  = <<-DESC
   A simple refresh and load more Refresh controller by swift
@@ -13,6 +13,7 @@ Pod::Spec.new do |s|
   s.license      = "MIT"
   s.author       = { "looseyi" => "13615033587@126.com" }
   s.platform     = :ios, "8.0"
+  s.ios.deployment_target = '8.0'
   s.source       = { :git => "https://github.com/looseyi/RefreshController.git", :tag => "#{s.version}" }
   s.source_files  = "Source", "Source/**/*.{swift}"
   s.exclude_files = "Classes/Exclude"
