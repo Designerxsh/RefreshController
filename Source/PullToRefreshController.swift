@@ -166,7 +166,7 @@ open class PullToRefreshController: NSObject {
             refresView.removeFromSuperview()
         }
         refresView = customView
-        scrollView?.addSubview(refresView)
+        scrollView?.insertSubview(refresView, at: 0)
         layoutRefreshView()
     }
 
