@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 public enum RefreshState {
-    case stop, trigger, loading
+    case `default`, stop, trigger, loading, stopping
 }
 
 public enum RefreshDirection {
@@ -76,7 +76,7 @@ open class PullToRefreshController: NSObject {
     }
 
     public init(scrollView: UIScrollView, direction: RefreshDirection) {
-        self.state = .stop
+        self.state = .default
         self.enable = true
         self.direction = direction
         self.scrollView = scrollView
@@ -136,10 +136,15 @@ open class PullToRefreshController: NSObject {
     }
 
     open func stopToRefresh(_ animated: Bool, completion: RefreshHandler? = nil) {
-        if !enable || state == .stop {
+        if !enable || state == .stop || state == .default {
+            state = .stop
             completion?()
             return
         }
+
+        if state == .stopping { return }
+        state = .stopping
+
         var delay = Date().timeIntervalSince1970 - triggerTime
         if delay < minRefrehDuration {
             delay = minRefrehDuration / 60
@@ -147,16 +152,15 @@ open class PullToRefreshController: NSObject {
         if delay > minRefrehDuration {
             delay = 0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: { [weak self] in
-            if let sSelf = self {
-                sSelf.state = .stop
-                let contentInset = sSelf.adjustedContentInset
-                let duration = animated ? RefreshViewAnimationDuration : 0.0
-                UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState ], animations: {
-                    sSelf.scrollView?.contentInset = contentInset
-                }) { finished in
-                    if finished { completion?() }
-                }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: {
+            [weak self] in guard let sSelf = self else { return }
+            sSelf.state = .stop
+            let contentInset = sSelf.adjustedContentInset
+            let duration = animated ? RefreshViewAnimationDuration : 0.0
+            UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState ], animations: {
+                sSelf.scrollView?.contentInset = contentInset
+            }) { finished in
+                if finished { completion?() }
             }
         })
     }
@@ -261,10 +265,10 @@ open class PullToRefreshController: NSObject {
             }
             contentInset = adjustedContentInset
             UIView.animate(withDuration: RefreshViewAnimationDuration,
-                                       delay: 0,
-                                       options: [.allowUserInteraction, .beginFromCurrentState],
-                                       animations: {
-                                        self.scrollView?.contentInset = contentInset
+                           delay: 0,
+                           options: [.allowUserInteraction, .beginFromCurrentState],
+                           animations: {
+                            self.scrollView?.contentInset = contentInset
             }) { [weak self] finished in
                 if let completion = self?.triggerHandler, finished {
                     completion()
