@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "RefreshController"
-  s.version      = "0.3.1"
+  s.version      = "0.3.2"
   s.summary      = "A simple refresh and load more Refresh controller by swift"
   s.description  = <<-DESC
   A simple refresh and load more Refresh controller by swift

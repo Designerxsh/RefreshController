@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 public enum RefreshState {
-    case `default`, stop, trigger, loading, stopping
+    case stop, trigger, loading, stopping
 }
 
 public enum RefreshDirection {
@@ -76,7 +76,7 @@ open class PullToRefreshController: NSObject {
     }
 
     public init(scrollView: UIScrollView, direction: RefreshDirection) {
-        self.state = .default
+        self.state = .stop
         self.enable = true
         self.direction = direction
         self.scrollView = scrollView
@@ -136,7 +136,7 @@ open class PullToRefreshController: NSObject {
     }
 
     open func stopToRefresh(_ animated: Bool, completion: RefreshHandler? = nil) {
-        if !enable || state == .stop || state == .default {
+        if !enable || state == .stop {
             state = .stop
             completion?()
             return
