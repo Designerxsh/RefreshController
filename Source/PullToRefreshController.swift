@@ -113,7 +113,7 @@ open class PullToRefreshController: NSObject {
     /// MAKR: Public method
 
     open func triggerRefresh(_ animated: Bool) {
-        if !enable || state == .loading {
+        if state != .stop || !enable {
             return
         }
         state = .loading
@@ -136,7 +136,7 @@ open class PullToRefreshController: NSObject {
     }
 
     open func stopToRefresh(_ animated: Bool, completion: RefreshHandler? = nil) {
-        if !enable || state == .stop {
+        if state == .stop || !enable {
             state = .stop
             completion?()
             return
