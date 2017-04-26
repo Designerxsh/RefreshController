@@ -157,10 +157,17 @@ open class PullToRefreshController: NSObject {
             sSelf.state = .stop
             let contentInset = sSelf.adjustedContentInset
             let duration = animated ? RefreshViewAnimationDuration : 0.0
-            UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState ], animations: {
+            if animated {
+                UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState ], animations: {
+                    sSelf.scrollView?.contentInset = contentInset
+                }) { finished in
+                    if finished {
+                        completion?()
+                    }
+                }
+            } else {
+                completion?()
                 sSelf.scrollView?.contentInset = contentInset
-            }) { finished in
-                if finished { completion?() }
             }
         })
     }

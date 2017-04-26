@@ -1,10 +1,11 @@
 Pod::Spec.new do |s|
   s.name         = "RefreshController"
-  s.version      = "0.3.3"
+  s.version      = "0.3.4"
   s.summary      = "A simple refresh and load more Refresh controller by swift"
   s.description  = <<-DESC
   A simple refresh and load more Refresh controller by swift
   which translate by JYRefreshController.
+  - update stop refresh controller refresh UI without animated
   - fix bugs for mutil refresh trigger bug.
   - fix bugs for mutil entery when stop loading.
   - fix bugs when tableview heiht height then contentsize and trigger both refresh and loadmore bug.
