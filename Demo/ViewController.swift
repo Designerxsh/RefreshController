@@ -7,47 +7,50 @@
 //
 
 import UIKit
+import RefreshController
+
 
 class ViewController: UIViewController {
     var tableView: UITableView!
-    var dataSource = [NSDate]()
+    var dataSource = [Date]()
     var refreshController: PullToRefreshController!
     var loadMoreController: PullToRefreshController!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Refresh", style: .Plain, target: self, action: #selector(startToRefresh))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "LoadMore", style: .Plain, target: self, action: #selector(startToLoadMore))
+        let refreshItem = UIBarButtonItem(title: "Refresh", style: .plain, target: self, action: #selector(startToRefresh))
+        let loadMoreItem = UIBarButtonItem(title: "LoadMore", style: .plain, target: self, action: #selector(startToLoadMore))
+        navigationItem.rightBarButtonItems = [refreshItem, loadMoreItem]
+        edgesForExtendedLayout = .bottom
 
         configureDataSource()
 
-        tableView = UITableView(frame: view.bounds)
+        tableView = UITableView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height))
         tableView.delegate = self
+        tableView.contentInset = .zero
         tableView.dataSource = self
-        tableView.registerClass(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell")
+        tableView.register(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell")
         view.addSubview(tableView)
-
-        refreshController = PullToRefreshController(scrollView: tableView, direction: .Top)
-        refreshController.triggerHandler = { [weak self] in
-            self?.insertRow(true)
+        if #available(iOS 11.0, *) {
+            tableView.contentInsetAdjustmentBehavior = .never
         }
 
-        loadMoreController = PullToRefreshController(scrollView: tableView, direction: .Bottom)
+        refreshController = PullToRefreshController(scrollView: tableView, direction: .top)
+        refreshController.triggerHandler = { [weak self] in
+            self?.insertRow(isTop: true)
+        }
+
+        loadMoreController = PullToRefreshController(scrollView: tableView, direction: .bottom)
         loadMoreController.triggerHandler = { [weak self] in
-            self?.insertRow(false)
+            self?.insertRow(isTop: false)
         }
         tableView.reloadData()
     }
 
-    deinit {
-        refreshController.scrollView = nil
-        loadMoreController.scrollView = nil
-    }
-
     private func configureDataSource() {
-        for i in 0...9 {
-            dataSource.append(NSDate(timeIntervalSinceNow: -NSTimeInterval(i) * 90))
+        for i in 0...12 {
+            dataSource.append(Date(timeIntervalSinceNow: TimeInterval(-i * 90)))
         }
     }
 
@@ -60,11 +63,11 @@ class ViewController: UIViewController {
     }
 
     private func insertRow(isTop: Bool) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { [weak self] () -> Void in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] () -> Void in
             if isTop {
-                self?.dataSource.insert(NSDate(), atIndex: 0)
+                self?.dataSource.insert(Date(), at: 0)
             } else {
-                self?.dataSource.append(NSDate())
+                self?.dataSource.append(Date())
             }
             self?.tableView.reloadData()
             if isTop {
@@ -77,15 +80,15 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
     }
 
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cellID = "cell"
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellID)
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID)
         let date = dataSource[indexPath.row]
-        cell?.textLabel?.text = NSDateFormatter.localizedStringFromDate(date, dateStyle: .NoStyle, timeStyle: .MediumStyle)
+        cell?.textLabel?.text = DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .medium)
         return cell!
     }
 }

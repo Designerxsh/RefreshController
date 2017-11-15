@@ -21,17 +21,18 @@ public typealias RefreshHandler = () -> ()
 
 open class PullToRefreshController: NSObject {
 
-    open weak var scrollView: UIScrollView? {
-        didSet {
-            removeScrollObser(oldValue)
-            addScrollObser(scrollView)
-        }
-    }
-    fileprivate(set) var direction: RefreshDirection
+    fileprivate(set) weak var scrollView: UIScrollView?
+
+    fileprivate(set) var direction: RefreshDirection = .top
+
     fileprivate var triggerTime: TimeInterval = 0
+
     fileprivate var originContentInset: CGFloat
+
     fileprivate var refresView: UIView!
+
     open var triggerHandler: RefreshHandler?
+
     open var minRefrehDuration: TimeInterval = 60
 
     // which work for RefreshDirection isLoadMore
@@ -42,6 +43,7 @@ open class PullToRefreshController: NSObject {
             }
         }
     }
+
     /**
      *  When pull To Refresh
      *  Set to false, if need user dragging to trigger load more action. Default is true.
@@ -67,8 +69,9 @@ open class PullToRefreshController: NSObject {
             }
         }
     }
+
     fileprivate(set) var state: RefreshState {
-        willSet(newValue) {
+        willSet {
             if let refresView = refresView as? RefreshViewProtocol, state != newValue {
                 refresView.pullToUpdate(self, didChangeState: newValue)
             }
@@ -84,29 +87,31 @@ open class PullToRefreshController: NSObject {
         self.originContentInset = direction.originContentInset(scrollView.contentInset)
         super.init()
         setCustomView(defalutRefreshView)
-        addScrollObser(scrollView)
+        addScrollViewObserver()
     }
 
-    public convenience init(scrollView: UIScrollView) {
-        self.init(scrollView: scrollView, direction: .top)
+    deinit {
+        removeScrollViewObserver()
     }
 
-    fileprivate func addScrollObser(_ scrollView: UIScrollView?) {
-        scrollView?.addObserver(self, forKeyPath: "contentOffset", options: .new, context: nil)
+    fileprivate func addScrollViewObserver() {
+        guard let scrollView = scrollView else { return }
+        scrollView.addObserver(self, forKeyPath: "contentOffset", options: .new, context: nil)
         if direction.isLoadMore {
-            scrollView?.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
-            scrollView?.contentInset = initialContentInset
+            scrollView.addObserver(self, forKeyPath: "contentSize", options: .new, context: nil)
+            scrollView.contentInset = initialContentInset
         } else {
-            scrollView?.addObserver(self, forKeyPath: "contentInset", options: .new, context: nil)
+            scrollView.addObserver(self, forKeyPath: "contentInset", options: .new, context: nil)
         }
     }
 
-    fileprivate func removeScrollObser(_ scrollView: UIScrollView?) {
-        scrollView?.removeObserver(self, forKeyPath: "contentOffset")
+    fileprivate func removeScrollViewObserver() {
+        guard let scrollView = scrollView else { return }
+        scrollView.removeObserver(self, forKeyPath: "contentOffset")
         if direction.isLoadMore {
-            scrollView?.removeObserver(self, forKeyPath: "contentSize")
+            scrollView.removeObserver(self, forKeyPath: "contentSize")
         } else {
-            scrollView?.removeObserver(self, forKeyPath: "contentInset")
+            scrollView.removeObserver(self, forKeyPath: "contentInset")
         }
     }
 
@@ -121,6 +126,7 @@ open class PullToRefreshController: NSObject {
         if let refresView = refresView as? RefreshViewProtocol {
             refresView.pullToUpdate(self, didChangePercentage: 1.0)
         }
+
         let contentInset = adjustedContentInset
         let contentOffset = triggeredContentOffset(contentInset)
         let needUpdateInset = !(direction.isLoadMore && autoLoadMore)
@@ -192,7 +198,7 @@ open class PullToRefreshController: NSObject {
         } else if path == "contentSize" {
             layoutRefreshView()
         } else if path == "contentInset" && !direction.isLoadMore {
-            if let changeValue = change?[NSKeyValueChangeKey.newKey] as? NSValue {
+            if let changeValue = change?[.newKey] as? NSValue {
                 let insets = changeValue.uiEdgeInsetsValue
                 if originContentInset != insets.top {
                     originContentInset = insets.top
@@ -209,6 +215,7 @@ open class PullToRefreshController: NSObject {
         guard let changeValue = change?[.newKey] as? NSValue, let scrollView = scrollView else {
             return
         }
+
         let contentOffset = changeValue.cgPointValue
         let refreshViewOffset = visibleDistance
         var contentInset = scrollView.contentInset
@@ -226,11 +233,12 @@ open class PullToRefreshController: NSObject {
             visibleOffset = -checkOffset - contentInset.left
         case .bottom:
             checkOffset = contentOffset.y
-            threshold = scrollView.contentSize.height + contentInset.bottom - scrollView.bounds.size.height
+            threshold = scrollView.contentSize.height + contentInset.bottom - scrollView.bounds.height
         case .right:
             checkOffset = contentOffset.x
-            threshold = scrollView.contentSize.width + contentInset.right - scrollView.bounds.size.width
+            threshold = scrollView.contentSize.width + contentInset.right - scrollView.bounds.width
         }
+
         var isTriggered = checkOffset <= threshold
         if direction.isLoadMore {
             if !autoLoadMore {
@@ -290,6 +298,7 @@ open class PullToRefreshController: NSObject {
             return
         }
         guard let scrollView = scrollView else { return }
+
         var frame = refresView.frame
         var refresingOffset = visibleDistance
         if direction.isLoadMore {
@@ -316,7 +325,7 @@ open class PullToRefreshController: NSObject {
     }
 
     fileprivate var initialContentInset: UIEdgeInsets {
-        guard var contentInset = scrollView?.contentInset else { return UIEdgeInsets.zero }
+        guard var contentInset = scrollView?.contentInset else { return .zero }
         if enable && autoLoadMore {
             if direction == .bottom {
                 contentInset.bottom += refresView.frame.height
@@ -334,7 +343,8 @@ open class PullToRefreshController: NSObject {
     }
 
     fileprivate var adjustedContentInset: UIEdgeInsets {
-        guard var contentInset = scrollView?.contentInset else { return UIEdgeInsets.zero }
+        guard var contentInset = scrollView?.contentInset else { return .zero }
+
         let refresingOffset = visibleDistance
         let mutil: CGFloat
         if case .stop = state {
@@ -356,7 +366,8 @@ open class PullToRefreshController: NSObject {
     }
 
     func triggeredContentOffset(_ inset: UIEdgeInsets) -> CGPoint {
-        guard let scrollView = scrollView else { return CGPoint.zero }
+        guard let scrollView = scrollView else { return .zero }
+
         switch direction {
         case .top:
             return CGPoint(x: 0, y: -inset.top)
@@ -383,7 +394,7 @@ open class PullToRefreshController: NSObject {
     }
 
     fileprivate var defalutRefreshView: RefreshView {
-        let bounds = self.scrollView!.bounds
+        let bounds = scrollView!.bounds
         let size = direction.refreshViewSize(bounds)
         let view = RefreshView(frame: CGRect(x: 0, y: 0, width: size.width, height: size.height))
         view.autoresizingMask = self.direction.isVertical ? .flexibleWidth : .flexibleHeight
