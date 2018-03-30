@@ -35,8 +35,10 @@ class ViewController: UIViewController {
         if #available(iOS 11.0, *) {
             tableView.contentInsetAdjustmentBehavior = .never
         }
-
+        let refreshView = RefreshView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44))
+        refreshView.autoresizingMask = .flexibleWidth
         refreshController = PullToRefreshController(scrollView: tableView, direction: .top)
+        refreshController.setCustomView(refreshView)
         refreshController.triggerHandler = { [weak self] in
             self?.insertRow(isTop: true)
         }

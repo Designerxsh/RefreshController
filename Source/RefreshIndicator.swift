@@ -54,7 +54,7 @@ private let RefreshAnimationKey = "spinkit-anim";
     public func stopAnimating() {
         if !stopped {
             if hideWhenStopped {
-                UIView.animate(withDuration: RefreshViewAnimationDuration, animations: {
+                UIView.animate(withDuration: Constants.animationDuration, animations: {
                     self.cycleLayer.transform = CATransform3DMakeScale(0.5, 0.5, 0.0)
                     self.cycleLayer.opacity = 0
                 })

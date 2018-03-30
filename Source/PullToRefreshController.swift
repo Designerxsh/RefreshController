@@ -6,8 +6,8 @@
 //  Copyright © 2559 BE Edmond. All rights reserved.
 //
 
-import Foundation
 import UIKit
+
 
 public enum RefreshState {
     case stop, trigger, loading, stopping
@@ -16,6 +16,12 @@ public enum RefreshState {
 public enum RefreshDirection {
     case top, left, bottom, right
 }
+
+public struct Constants {
+    static var defaultHeight: CGFloat = 44.0
+    static var animationDuration: TimeInterval = 0.3
+}
+
 
 public typealias RefreshHandler = () -> ()
 
@@ -130,7 +136,7 @@ open class PullToRefreshController: NSObject {
         let contentInset = adjustedContentInset
         let contentOffset = triggeredContentOffset(contentInset)
         let needUpdateInset = !(direction.isLoadMore && autoLoadMore)
-        let duration = animated ? RefreshViewAnimationDuration : 0.0
+        let duration = animated ? Constants.animationDuration  : 0.0
         UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState], animations: {
             self.scrollView?.contentOffset = contentOffset
             if needUpdateInset {
@@ -162,7 +168,7 @@ open class PullToRefreshController: NSObject {
             [weak self] in guard let sSelf = self else { return }
             sSelf.state = .stop
             let contentInset = sSelf.adjustedContentInset
-            let duration = animated ? RefreshViewAnimationDuration : 0.0
+            let duration = animated ? Constants.animationDuration : 0.0
             if animated {
                 UIView.animate(withDuration: duration, delay: 0, options: [.allowUserInteraction, .beginFromCurrentState ], animations: {
                     sSelf.scrollView?.contentInset = contentInset
@@ -279,7 +285,7 @@ open class PullToRefreshController: NSObject {
                 return
             }
             contentInset = adjustedContentInset
-            UIView.animate(withDuration: RefreshViewAnimationDuration,
+            UIView.animate(withDuration: Constants.animationDuration,
                            delay: 0,
                            options: [.allowUserInteraction, .beginFromCurrentState],
                            animations: {
@@ -427,9 +433,9 @@ extension RefreshDirection {
     func refreshViewSize(_ frame: CGRect) -> CGSize {
         switch self {
         case .top, .bottom:
-            return CGSize(width: frame.width, height: RefreshViewDefaultHeight)
+            return CGSize(width: frame.width, height: Constants.defaultHeight)
         case .left, .right:
-            return CGSize(width: RefreshViewDefaultHeight, height: frame.height)
+            return CGSize(width: Constants.defaultHeight, height: frame.height)
         }
     }
 }
