@@ -1,0 +1,6 @@
+module RefreshController {
+  umbrella header "RefreshController-umbrella.h"
+
+  export *
+  module * { export * }
+}

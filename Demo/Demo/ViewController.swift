@@ -10,7 +10,17 @@ import UIKit
 import RefreshController
 
 
-class ViewController: UIViewController {
+var safeAreaInsets: UIEdgeInsets {
+    if #available(iOS 11.0, *) {
+        if let top = UIApplication.shared.keyWindow?.safeAreaInsets.top, top > 0 {
+            return UIEdgeInsets(top: top + 44, left: 0, bottom: 0, right: 0)
+        }
+    }
+    return .zero
+}
+
+
+final class ViewController: UIViewController {
     var tableView: UITableView!
     var dataSource = [Date]()
     var refreshController: PullToRefreshController!
@@ -21,12 +31,15 @@ class ViewController: UIViewController {
 
         let refreshItem = UIBarButtonItem(title: "Refresh", style: .plain, target: self, action: #selector(startToRefresh))
         let loadMoreItem = UIBarButtonItem(title: "LoadMore", style: .plain, target: self, action: #selector(startToLoadMore))
-        navigationItem.rightBarButtonItems = [refreshItem, loadMoreItem]
+        navigationItem.leftBarButtonItem = refreshItem
+        navigationItem.rightBarButtonItem = loadMoreItem
+
         edgesForExtendedLayout = .bottom
 
         configureDataSource()
 
-        tableView = UITableView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height))
+
+        tableView = UITableView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: view.bounds.height - safeAreaInsets.bottom))
         tableView.delegate = self
         tableView.contentInset = .zero
         tableView.dataSource = self
