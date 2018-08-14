@@ -20,4 +20,5 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/looseyi/RefreshController.git", :tag => "#{s.version}" }
   s.source_files  = "Source", "RefreshController/**/*.{swift}"
   s.exclude_files = "Classes/Exclude"
+  s.static_framework = true
 end
